@@ -363,14 +363,26 @@ function initChatPage() {
             hideTypingIndicator();
 
             let errorMessage = 'Sorry, I encountered an error. Please try again.';
+            
             if (error.message.includes('Too many requests') || error.message.includes('rate limit')) {
                 errorMessage = 'I need a moment to catch my breath! Please wait a bit before sending another message. 💭';
             } else if (error.message.includes('overloaded')) {
                 errorMessage = 'I\'m a bit overwhelmed right now. Please try again in a few seconds! 😅';
+            } else if (error.message.includes('API key')) {
+                errorMessage = 'There seems to be a configuration issue. Please try again in a moment. 🔧';
+            } else if (error.message.includes('safety') || error.message.includes('content')) {
+                errorMessage = 'That message contains content I can\'t respond to. Please try rephrasing! 🤗';
+            } else if (error.message.includes('Failed to fetch') || error.message.includes('network')) {
+                errorMessage = 'Connection issue detected. Please check your internet and try again. 📡';
             }
 
             addMessage(errorMessage, 'bot');
-            console.error('Error:', error);
+            console.error('Error details:', error);
+            
+            // Log to help debug
+            console.log('Current time:', new Date().toISOString());
+            console.log('Error type:', error.name);
+            console.log('Error message:', error.message);
         } finally {
             // Re-enable input
             setInputState(false);
@@ -499,6 +511,32 @@ if (window.location.pathname.includes('chat.html')) {
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(initBackgroundEffects, 1000);
     });
+}
+
+// Debug function to check API status
+async function checkApiStatus() {
+    try {
+        const response = await fetch('/health');
+        const data = await response.json();
+        
+        let statusMessage = `API Status:\n`;
+        statusMessage += `• Total Keys: ${data.totalApiKeys}\n`;
+        statusMessage += `• Available: ${data.availableApiKeys}\n`;
+        statusMessage += `• Rate Limited: ${data.rateLimitedKeys}\n`;
+        statusMessage += `• Custom Characters: ${data.customCharacters}\n`;
+        statusMessage += `• Uptime: ${Math.round(data.uptime)} seconds`;
+        
+        if (data.rateLimitDetails && data.rateLimitDetails.length > 0) {
+            statusMessage += `\n\nRate Limited Keys:\n`;
+            data.rateLimitDetails.forEach(detail => {
+                statusMessage += `• Key ${detail.keyIndex}: ${detail.remainingTime}s remaining\n`;
+            });
+        }
+        
+        alert(statusMessage);
+    } catch (error) {
+        alert('Failed to check API status: ' + error.message);
+    }
 }
 
 // Add some interactive effects
