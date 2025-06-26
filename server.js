@@ -307,17 +307,31 @@ app.get('/', (req, res) => {
 
 // Health check endpoint for debugging
 app.get('/health', (req, res) => {
+  const now = Date.now();
   const availableInstances = genAIInstances.filter(instance => 
-    !instance.rateLimited || Date.now() > instance.rateLimitUntil
+    !instance.rateLimited || now > instance.rateLimitUntil
   );
   
+  const rateLimitedInstances = genAIInstances.filter(instance => 
+    instance.rateLimited && now <= instance.rateLimitUntil
+  );
+
   res.json({
     status: 'ok',
     totalApiKeys: genAIInstances.length,
     availableApiKeys: availableInstances.length,
-    rateLimitedKeys: genAIInstances.length - availableInstances.length,
+    rateLimitedKeys: rateLimitedInstances.length,
+    rateLimitDetails: rateLimitedInstances.map(instance => ({
+      keyIndex: instance.keyIndex,
+      rateLimitUntil: new Date(instance.rateLimitUntil).toISOString(),
+      remainingTime: Math.max(0, Math.ceil((instance.rateLimitUntil - now) / 1000))
+    })),
     customCharacters: global.customCharacters ? global.customCharacters.size : 0,
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    environment: {
+      hasValidApiKeys: apiKeys.length > 0,
+      apiKeyCount: apiKeys.length
+    }
   });
 });
 
