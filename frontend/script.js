@@ -78,7 +78,13 @@ function initIndexPage() {
     const companionCards = document.querySelectorAll('.companion-card');
 
     companionCards.forEach(card => {
-        card.addEventListener('click', () => {
+        card.addEventListener('click', (e) => {
+            // Prevent multiple clicks
+            if (card.classList.contains('loading')) {
+                e.preventDefault();
+                return;
+            }
+
             const gender = card.dataset.gender;
             const action = card.dataset.action;
 
