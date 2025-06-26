@@ -246,6 +246,12 @@ async function generateWithRetry(prompt, retries = 0, lastUsedInstance = null) {
     return text;
   } catch (error) {
     console.error(`❌ Generation attempt ${retries + 1} failed:`, error.message);
+    console.error(`❌ Error details:`, error);
+    
+    // Log the full error response if available
+    if (error.response) {
+      console.error(`❌ API Response:`, error.response.data);
+    }
 
     // Get the current instance for rate limiting
     let currentInstance = apiInstance || getAvailableApiInstance();
@@ -297,6 +303,22 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 // Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+});
+
+// Health check endpoint for debugging
+app.get('/health', (req, res) => {
+  const availableInstances = genAIInstances.filter(instance => 
+    !instance.rateLimited || Date.now() > instance.rateLimitUntil
+  );
+  
+  res.json({
+    status: 'ok',
+    totalApiKeys: genAIInstances.length,
+    availableApiKeys: availableInstances.length,
+    rateLimitedKeys: genAIInstances.length - availableInstances.length,
+    customCharacters: global.customCharacters ? global.customCharacters.size : 0,
+    uptime: process.uptime()
+  });
 });
 
 app.post('/generate', async (req, res) => {
@@ -367,6 +389,7 @@ app.post('/generate', async (req, res) => {
     res.json({ response: text });
   } catch (error) {
     console.error('❌ Error in /generate endpoint:', error.message);
+    console.error('❌ Full error details:', error);
 
     if (error.message.includes('429') || 
         error.message.includes('rate limit') || 
@@ -382,10 +405,21 @@ app.post('/generate', async (req, res) => {
         error: 'All my thinking circuits are busy right now. Please try again in a moment! 🧠',
         retryAfter: 120
       });
+    } else if (error.message.includes('API_KEY_INVALID') || error.message.includes('invalid api key')) {
+      res.status(401).json({ 
+        error: 'API key issue detected. Please check server configuration.',
+        details: 'Invalid API key'
+      });
+    } else if (error.message.includes('SAFETY')) {
+      res.status(400).json({ 
+        error: 'That message contains content I can\'t respond to. Please try rephrasing! 🤗',
+        details: 'Content safety filter triggered'
+      });
     } else {
       res.status(500).json({ 
         error: 'Something went wrong on my end. Please try again!',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        details: error.message || 'Unknown error',
+        debug: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }
