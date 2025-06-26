@@ -233,6 +233,17 @@ async function generateWithRetry(prompt, retries = 0, lastUsedInstance = null) {
     });
 
     const response = await result.response;
+    
+    // Check if response has candidates
+    if (!response.candidates || response.candidates.length === 0) {
+      throw new Error('No response candidates received from API');
+    }
+
+    // Check for safety blocks
+    if (response.candidates[0].finishReason === 'SAFETY') {
+      throw new Error('Response blocked by safety filters');
+    }
+
     const text = response.text();
 
     if (!text || text.trim() === '') {
@@ -248,9 +259,21 @@ async function generateWithRetry(prompt, retries = 0, lastUsedInstance = null) {
     console.error(`❌ Generation attempt ${retries + 1} failed:`, error.message);
     console.error(`❌ Error details:`, error);
     
-    // Log the full error response if available
+    // Enhanced error logging for debugging
     if (error.response) {
-      console.error(`❌ API Response:`, error.response.data);
+      console.error(`❌ API Response:`, error.response);
+      console.error(`❌ API Response Data:`, error.response.data);
+      console.error(`❌ API Response Status:`, error.response.status);
+    }
+    
+    // Log the error stack for better debugging
+    if (error.stack) {
+      console.error(`❌ Error Stack:`, error.stack);
+    }
+    
+    // Log specific Gemini API error details
+    if (error.toString().includes('GoogleGenerativeAI')) {
+      console.error(`❌ Gemini API specific error:`, error.toString());
     }
 
     // Get the current instance for rate limiting
