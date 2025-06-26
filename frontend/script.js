@@ -363,7 +363,7 @@ function initChatPage() {
             hideTypingIndicator();
 
             let errorMessage = 'Sorry, I encountered an error. Please try again.';
-            
+
             if (error.message.includes('Too many requests') || error.message.includes('rate limit')) {
                 errorMessage = 'I need a moment to catch my breath! Please wait a bit before sending another message. 💭';
             } else if (error.message.includes('overloaded')) {
@@ -378,7 +378,7 @@ function initChatPage() {
 
             addMessage(errorMessage, 'bot');
             console.error('Error details:', error);
-            
+
             // Log to help debug
             console.log('Current time:', new Date().toISOString());
             console.log('Error type:', error.name);
@@ -518,21 +518,21 @@ async function checkApiStatus() {
     try {
         const response = await fetch('/health');
         const data = await response.json();
-        
+
         let statusMessage = `API Status:\n`;
         statusMessage += `• Total Keys: ${data.totalApiKeys}\n`;
         statusMessage += `• Available: ${data.availableApiKeys}\n`;
         statusMessage += `• Rate Limited: ${data.rateLimitedKeys}\n`;
         statusMessage += `• Custom Characters: ${data.customCharacters}\n`;
         statusMessage += `• Uptime: ${Math.round(data.uptime)} seconds`;
-        
+
         if (data.rateLimitDetails && data.rateLimitDetails.length > 0) {
             statusMessage += `\n\nRate Limited Keys:\n`;
             data.rateLimitDetails.forEach(detail => {
                 statusMessage += `• Key ${detail.keyIndex}: ${detail.remainingTime}s remaining\n`;
             });
         }
-        
+
         alert(statusMessage);
     } catch (error) {
         alert('Failed to check API status: ' + error.message);
@@ -718,7 +718,6 @@ function initCreateCharacterPage() {
     descriptionInput.addEventListener('input', () => {
         const count = descriptionInput.value.length;
         document.getElementById('desc-count').textContent = `${count}/200`;
-        updatePreview();
         validateForm();
     });
 
@@ -739,23 +738,15 @@ function initCreateCharacterPage() {
         createBtn.disabled = !isValid;
     }
 
-    // Update preview
-    function updatePreview() {
-        document.getElementById('preview-name').textContent = nameInput.value || 'Your Companion';
-        document.getElementById('preview-description').textContent = descriptionInput.value || 'Your companion\'s description will appear here';
-        document.getElementById('preview-avatar').textContent = avatarInput.value || '🤖';
-    }
-
     // Event listeners
-    nameInput.addEventListener('input', () => { updatePreview(); validateForm(); });
-    avatarInput.addEventListener('input', () => { updatePreview(); validateForm(); });
+    nameInput.addEventListener('input', () => { validateForm(); });
+    avatarInput.addEventListener('input', () => { validateForm(); });
     genderSelect.addEventListener('change', validateForm);
 
     // Emoji selection
     emojiOptions.forEach(option => {
         option.addEventListener('click', () => {
             avatarInput.value = option.dataset.emoji;
-            updatePreview();
             validateForm();
         });
     });
