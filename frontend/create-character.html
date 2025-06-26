@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Companion - TrueCompanion</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="create-page">
+    <div class="container">
+        <header class="header">
+            <button class="back-btn" onclick="goBack()">← Back</button>
+            <h1 class="logo">Create Your Companion</h1>
+            <p class="tagline">Design your perfect AI companion</p>
+        </header>
+
+        <main class="main-content">
+            <div class="creation-form">
+                <div class="form-section">
+                    <label for="char-name">Name</label>
+                    <input type="text" id="char-name" placeholder="Enter your companion's name" maxlength="50">
+                </div>
+
+                <div class="form-section">
+                    <label for="char-avatar">Avatar (Emoji)</label>
+                    <input type="text" id="char-avatar" placeholder="🤖" maxlength="2">
+                    <div class="emoji-suggestions">
+                        <span class="emoji-option" data-emoji="💫">💫</span>
+                        <span class="emoji-option" data-emoji="🌟">🌟</span>
+                        <span class="emoji-option" data-emoji="💎">💎</span>
+                        <span class="emoji-option" data-emoji="🦋">🦋</span>
+                        <span class="emoji-option" data-emoji="🌸">🌸</span>
+                        <span class="emoji-option" data-emoji="⚡">⚡</span>
+                        <span class="emoji-option" data-emoji="🔥">🔥</span>
+                        <span class="emoji-option" data-emoji="🌙">🌙</span>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <label for="char-gender">Gender</label>
+                    <select id="char-gender">
+                        <option value="">Select gender</option>
+                        <option value="girlfriend">Girlfriend</option>
+                        <option value="boyfriend">Boyfriend</option>
+                    </select>
+                </div>
+
+                <div class="form-section">
+                    <label for="char-description">Description</label>
+                    <textarea id="char-description" placeholder="A brief description of your companion (e.g., Sweet and caring, loves music)" maxlength="200"></textarea>
+                    <span class="char-count" id="desc-count">0/200</span>
+                </div>
+
+                <div class="form-section">
+                    <label for="char-personality">Personality</label>
+                    <textarea id="char-personality" placeholder="Describe how your companion should act and speak (e.g., You are caring and gentle, you speak with warmth and empathy...)" maxlength="500"></textarea>
+                    <span class="char-count" id="personality-count">0/500</span>
+                </div>
+
+                <div class="mood-section">
+                    <label>Initial Mood</label>
+                    <div class="mood-options">
+                        <button class="mood-btn active" data-mood="happy">😊 Happy</button>
+                        <button class="mood-btn" data-mood="calm">😌 Calm</button>
+                        <button class="mood-btn" data-mood="flirty">😉 Flirty</button>
+                        <button class="mood-btn" data-mood="energetic">⚡ Energetic</button>
+                    </div>
+                </div>
+
+                <button class="create-btn" id="create-character-btn" disabled>
+                    <span class="btn-text">✨ Create Companion</span>
+                    <span class="btn-loading">Creating...</span>
+                </button>
+            </div>
+
+            <div class="preview-section" id="preview-section">
+                <h3>Preview</h3>
+                <div class="character-preview">
+                    <div class="preview-avatar" id="preview-avatar">🤖</div>
+                    <div class="preview-info">
+                        <h4 id="preview-name">Your Companion</h4>
+                        <p id="preview-description">Your companion's description will appear here</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
